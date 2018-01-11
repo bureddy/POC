@@ -516,6 +516,36 @@ touch_data (void * sbuf, void * rbuf, int rank, size_t size)
     } else {
         set_device_memory(sbuf, 'a', size);
         set_device_memory(rbuf, 'b', size);
+        cudaStreamSynchronize(0);
+    }
+}
+
+void
+verify_data (void * sbuf, void * rbuf, int rank, size_t size)
+{
+    if ((0 == rank && 'H' == options.src) ||
+            (1 == rank && 'H' == options.dst)) {
+    } else {
+	char *host_sbuf;
+	char *host_rbuf;
+	int i;
+	int errs = 0;
+
+	host_sbuf = (char *) malloc(size);
+	host_rbuf = (char *) malloc(size);
+	cudaMemcpy((void *) host_sbuf, sbuf, size, cudaMemcpyDeviceToHost);
+	cudaMemcpy((void *) host_rbuf, rbuf, size, cudaMemcpyDeviceToHost);
+	for (i = 0; i < size; i++) {
+	    if (host_sbuf[i] != 'a') errs++;
+	}
+	if (errs) printf("noticed %d errors in send buffer\n", errs);
+
+	for (i = 0; i < size; i++) {
+	    if (host_rbuf[i] != 'a') errs++;
+	}
+	if (errs) printf("noticed %d errors in send buffer\n", errs);
+	free(host_sbuf);
+	free(host_rbuf);
     }
 }
 

@@ -122,6 +122,7 @@ int process_options (int argc, char *argv[], int type);
 int allocate_memory (char **sbuf, char **rbuf, int rank);
 void print_header (int rank, int type);
 void touch_data (void *sbuf, void *rbuf, int rank, size_t size);
+void verify_data (void *sbuf, void *rbuf, int rank, size_t size);
 void free_memory (void *sbuf, void *rbuf, int rank);
 int init_accel (void);
 int cleanup_accel (void);

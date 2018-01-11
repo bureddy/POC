@@ -80,10 +80,8 @@ main (int argc, char *argv[])
 
     print_header(myid, LAT);
 
-    
     /* Latency test */
     for(size = 0; size <= MAX_MSG_SIZE; size = (size ? size * 2 : 1)) {
-        touch_data(s_buf, r_buf, myid, size);
 
         if(size > LARGE_MESSAGE_SIZE) {
             options.loop = options.loop_large;
@@ -94,10 +92,12 @@ main (int argc, char *argv[])
 
         if(myid == 0) {
             for(i = 0; i < options.loop + options.skip; i++) {
+		touch_data(s_buf, r_buf, myid, size);
                 if(i == options.skip) t_start = MPI_Wtime();
 
                 MPI_Send(s_buf, size, MPI_CHAR, 1, 1, MPI_COMM_WORLD);
                 MPI_Recv(r_buf, size, MPI_CHAR, 1, 1, MPI_COMM_WORLD, &reqstat);
+		verify_data(s_buf, r_buf, myid, size);
             }
 
             t_end = MPI_Wtime();
@@ -105,8 +105,10 @@ main (int argc, char *argv[])
 
         else if(myid == 1) {
             for(i = 0; i < options.loop + options.skip; i++) {
+		touch_data(s_buf, r_buf, myid, size);
                 MPI_Recv(r_buf, size, MPI_CHAR, 0, 1, MPI_COMM_WORLD, &reqstat);
                 MPI_Send(s_buf, size, MPI_CHAR, 0, 1, MPI_COMM_WORLD);
+		verify_data(s_buf, r_buf, myid, size);
             }
         }
 
